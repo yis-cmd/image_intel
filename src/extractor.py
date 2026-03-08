@@ -13,9 +13,10 @@ def dms_to_decimal(dms_tuple, ref):
     if not dms_tuple or not ref:
         return None
     try:
-        degrees = dms_tuple[0][0] / dms_tuple[0][1]
-        minutes = dms_tuple[1][0] / dms_tuple[1][1]
-        seconds = dms_tuple[2][0] / dms_tuple[2][1]
+        degrees = float(dms_tuple[0])
+        minutes = float(dms_tuple[1])
+        seconds = float(dms_tuple[2])
+
         decimal = degrees + minutes / 60 + seconds / 3600
         if ref in [b'S', b'W', 'S', 'W']:
             decimal = -decimal
@@ -45,7 +46,11 @@ def longitude(data: dict):
 
 
 def datatime(data: dict):
-    return data.get("DateTime")
+    return (
+        data.get("DateTimeOriginal")
+        or data.get("DateTimeDigitized")
+        or data.get("DateTime")
+    )
 
 
 def camera_make(data: dict):
