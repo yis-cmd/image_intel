@@ -5,7 +5,7 @@ from pathlib import Path
 
 """
 extractor.py - שליפת EXIF מתמונות
-צוות 1, זוג A
+צוות 1, זוג A   h
 """
 
 
