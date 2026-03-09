@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Photo Intelligence Report</title>
+</head>
+<body>
+    <h1>Analysis Report</h1>
+    {{ map_html | safe }}
+    {{ timeline_html | safe }}
+    <div class="analysis">
+        {% for key, value in analysis.items() %}
+            <p>{{ key }}: {{ value }}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
