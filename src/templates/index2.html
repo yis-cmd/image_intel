@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Intel - מודיעין חזותי</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --border-color: #475569;
+            --success-color: #10b981;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+            width: 100%;
+            max-width: 900px; /* הרחבנו קצת כדי שיהיה מקום למפה ולטבלה */
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            margin-top: 0;
+            letter-spacing: 2px;
+        }
+
+        p {
+            color: #94a3b8;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        /* סגנונות אזור העלאת הקבצים */
+        .upload-section {
+            display: block;
+        }
+
+        .file-drop-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 50px 20px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+        }
+
+        .file-drop-area:hover, .file-drop-area.dragover {
+            border-color: var(--accent-color);
+            background-color: rgba(56, 189, 248, 0.08);
+        }
+
+        .file-msg {
+            font-size: 1.2em;
+            color: #cbd5e1;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .file-msg-sub {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            color: white;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+        }
+
+        .btn:disabled {
+            background-color: var(--border-color);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* סגנונות אזור התוצאות */
+        .results-section {
+            display: none;
+            text-align: right;
+        }
+
+        .section-title {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 450px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .timeline-container {
+            margin-bottom: 30px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        .loader {
+            display: none;
+            color: var(--accent-color);
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Intel</h1>
+        <p>מערכת סריקה וניתוח נתוני EXIF</p>
+
+        <div class="upload-section" id="upload-section">
+            <form id="upload-form">
+                <div class="file-drop-area" id="drop-area">
+                    <span class="file-msg" id="file-msg">לחץ כאן לבחירת תיקיית תמונות</span>
+                    <span class="file-msg-sub" id="file-msg-sub">כל התמונות בתיקייה ייסרקו</span>
+                    <input type="file" name="photos" id="file-input" webkitdirectory directory multiple accept="image/*">
+                </div>
+                <button type="submit" class="btn" id="submit-btn">התחל ניתוח מודיעיני</button>
+            </form>
+            <div class="loader" id="loader">מנתח נתונים, אנא המתן... ⏳</div>
+        </div>
+
+        <div class="results-section" id="results-section">
+            <h2 id="summary-msg" style="color: var(--success-color); text-align: center;"></h2>
+
+            <h3 class="section-title">📍 פריסה גיאוגרפית (מפה)</h3>
+            <div class="map-container">
+                <iframe id="map-frame"></iframe>
+            </div>
+
+            <h3 class="section-title">⏱️ ציר זמן</h3>
+            <div class="timeline-container" id="timeline-container"></div>
+
+            <h3 class="section-title">📋 פירוט נתונים שחולצו</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>שם קובץ</th>
+                        <th>תאריך צילום</th>
+                        <th>מצלמה</th>
+                        <th>מיקום (GPS)</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    </tbody>
+            </table>
+
+            <button class="btn" style="margin-top: 30px; background-color: #64748b; color: white;" onclick="resetForm()">סרוק תיקייה חדשה</button>
+        </div>
+    </div>
+
+    <script>
+    // --- לוגיקת ממשק משתמש והעלאת קבצים ---
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const fileMsg = document.getElementById('file-msg');
+    const fileMsgSub = document.getElementById('file-msg-sub');
+    const uploadForm = document.getElementById('upload-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const loader = document.getElementById('loader');
+
+    const uploadSection = document.getElementById('upload-section');
+    const resultsSection = document.getElementById('results-section');
+
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+        const totalFiles = e.target.files.length;
+        if (totalFiles > 0) {
+            fileMsg.textContent = `נבחרו ${totalFiles} קבצים בתיקייה`;
+            fileMsg.style.color = "var(--accent-color)";
+        } else {
+            fileMsg.textContent = "לחץ כאן לבחירת תיקיית תמונות";
+            fileMsg.style.color = "#cbd5e1";
+        }
+    });
+
+    // --- לוגיקת שליחת הנתונים לשרת והצגת התוצאות ---
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // מונע מהדפדפן לרענן את העמוד ולעבור ל-/analyze
+
+        if (fileInput.files.length === 0) {
+            alert("אנא בחר תיקייה עם תמונות לפני תחילת הניתוח.");
+            return;
+        }
+
+        // הצגת סטטוס טעינה
+        submitBtn.disabled = true;
+        loader.style.display = "block";
+
+        const formData = new FormData(uploadForm);
+
+        try {
+            // שליחת בקשה מאחורי הקלעים
+            const response = await fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "אירעה שגיאה בשרת");
+            }
+
+            // --- עדכון הממשק עם התוצאות ---
+
+            // 1. הסתרת אזור ההעלאה והצגת התוצאות
+            uploadSection.style.display = "none";
+            resultsSection.style.display = "block";
+
+            // 2. כותרת סיכום
+            document.getElementById('summary-msg').textContent = data.message;
+
+            // 3. הזרקת המפה (מכיוון שזה HTML מלא עם סקריפטים, חובה לשים בתוך iframe)
+            const mapFrame = document.getElementById('map-frame');
+            if (data.map_html) {
+                mapFrame.srcdoc = data.map_html;
+            } else {
+                mapFrame.srcdoc = "<div style='text-align:center; padding:50px; font-family:sans-serif;'>לא נמצאו נתוני מיקום מספיקים ליצירת מפה</div>";
+            }
+
+            // 4. הזרקת ציר הזמן
+            const timelineContainer = document.getElementById('timeline-container');
+            if (data.timeline_html) {
+                timelineContainer.innerHTML = data.timeline_html;
+            } else {
+                timelineContainer.innerHTML = "<p style='text-align:center; color:black;'>לא ניתן לייצר ציר זמן</p>";
+            }
+
+            // 5. בניית טבלת הנתונים
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = ""; // ניקוי טבלה קודמת
+
+            data.images_data.forEach(img => {
+                const row = document.createElement('tr');
+
+                const camera = img.camera_make ? `${img.camera_make} ${img.camera_model || ''}` : 'לא ידוע';
+                const location = img.has_gps ? `📍 ${img.latitude.toFixed(4)}, ${img.longitude.toFixed(4)}` : 'אין נתונים';
+                const time = img.datetime || 'לא ידוע';
+
+                row.innerHTML = `
+                    <td dir="ltr" style="text-align: right;">${img.filename}</td>
+                    <td dir="ltr" style="text-align: right;">${time}</td>
+                    <td>${camera}</td>
+                    <td dir="ltr" style="text-align: right;">${location}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+        } catch (error) {
+            alert("שגיאה: " + error.message);
+        } finally {
+            // החזרת הכפתור למצב פעיל למקרה של שגיאה
+            submitBtn.disabled = false;
+            loader.style.display = "none";
+        }
+    });
+
+    // פונקציה לחזרה אחורה
+    function resetForm() {
+        uploadForm.reset();
+        fileMsg.textContent = "לחץ כאן לבחירת תיקיית תמונות";
+        fileMsg.style.color = "#cbd5e1";
+        resultsSection.style.display = "none";
+        uploadSection.style.display = "block";
+    }
+    </script>
+</body>
+</html>
